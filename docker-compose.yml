@@ -1,24 +1,46 @@
 version: '3.8'
+
 services:
-    mysql:
-        image: 'mysql:8.0'
-        container_name: mysql-laravel
-        restart: unless-stopped
-        environment:
-            MYSQL_ROOT_PASSWORD: '${MYSQL_ROOT_PASSWORD}'
-            MYSQL_DATABASE: '${MYSQL_DATABASE}'
-            MYSQL_USER: '${MYSQL_USER}'
-            MYSQL_PASSWORD: '${MYSQL_PASSWORD}'
-        ports:
-            - '3306:3306'
-        volumes:
-            - 'db_data:/var/lib/mysql'
-        networks:
-            - laravel-network
+  laravel.test:
+    build:
+      context: ./vendor/laravel/sail/runtimes/8.2
+      dockerfile: Dockerfile
+      args:
+        WWWGROUP: '${WWWGROUP}'
+    image: sail-8.2/app
+    container_name: laravel.test
+    ports:
+      - '8080:80'  # Porta alterada para evitar conflito com porta 80
+    environment:
+      WWWUSER: '${WWWUSER}'
+      LARAVEL_SAIL: 1
+    volumes:
+      - '.:/var/www/html'
+    depends_on:
+      - mysql
+    networks:
+      - laravel-network
+
+  mysql:
+    image: 'mysql:8.0'
+    container_name: mysql-laravel
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: '${MYSQL_ROOT_PASSWORD}'
+      MYSQL_DATABASE: '${MYSQL_DATABASE}'
+      MYSQL_USER: '${MYSQL_USER}'
+      MYSQL_PASSWORD: '${MYSQL_PASSWORD}'
+    ports:
+      - '3306:3306'
+    volumes:
+      - 'db_data:/var/lib/mysql'
+    networks:
+      - laravel-network
+
 volumes:
-    db_data: null
-    sail-mysql:
-        driver: local
+  db_data:
+  sail-mysql:
+
 networks:
-    laravel-network:
-        driver: bridge
+  laravel-network:
+    driver: bridge
